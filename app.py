@@ -136,12 +136,12 @@ t = {
 # --- 4. SIDEBAR ---
 with st.sidebar:
     st.image("zebricorn_logo.png", width=140)
-    lang = st.selectbox("", ["English", "Svenska"], label_visibility="collapsed")
+    lang = st.selectbox("Select Language", ["English", "Svenska"], label_visibility="collapsed")
     st.divider()
     
     st.markdown(f"### {t[lang]['nav_header']}")
     menu = st.radio(
-        "",
+        "Navigation Menu",
         [t[lang]["nav_core"], t[lang]["nav_github"], t[lang]["nav_contact"]],
         label_visibility="collapsed"
     )
