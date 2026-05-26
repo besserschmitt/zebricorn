@@ -1,4 +1,6 @@
 import streamlit as st
+import streamlit.components.v1 as components
+import os
 
 # --- 1. CONFIGURATION ---
 st.set_page_config(
@@ -77,6 +79,7 @@ t = {
         "nav_header": "Navigation",
         "nav_core": "consulting-core",
         "nav_github": "github-repository",
+        "nav_slides": "architecture-decks",
         "nav_contact": "contact-info",
         "status_label": "Status",
         "status_text": "Available for Projects",
@@ -95,6 +98,11 @@ t = {
         "gh_d": "The Zebricorn repository is designed for cloud-native deployment and containerized development. Here is the current architecture of the main project:",
         "repo_h": "Repository Structure (zebricorn / main)",
         "gh_btn": "View on GitHub",
+        "slides_h": "Interactive Architecture Specifications",
+        "slides_d": "Select an architectural deck below to explore enterprise system maps and evolution metrics generated via tokenized prompt flows.",
+        "slides_select": "Choose Presentation Deck",
+        "deck_evolution": "🔄 Coach Engine: Project Deep Dive & Evolution",
+        "deck_v47": "🧠 Coach Engine: v4.7 Technical Architecture Specification",
         "contact_info_h": "Contact Info",
         "contact_intro": "Zebricorn Consulting AB is available for specialist assignments in Financial IT and Data Architecture.",
         "contact_det": "Contact Details",
@@ -106,6 +114,7 @@ t = {
         "nav_header": "Navigation",
         "nav_core": "konsult-profil",
         "nav_github": "github-repository",
+        "nav_slides": "arkitektur-decks",
         "nav_contact": "kontakt-info",
         "status_label": "Status",
         "status_text": "Tillgänglig för uppdrag",
@@ -124,6 +133,11 @@ t = {
         "gh_d": "Zebricorn-repositoryt är byggt för cloud-native driftsättning och containeriserad utveckling. Här är den nuvarande arkitekturen för huvudprojektet:",
         "repo_h": "Repository-struktur (zebricorn / main)",
         "gh_btn": "Se på GitHub",
+        "slides_h": "Interaktiva Arkitekturspecifikationer",
+        "slides_d": "Välj en presentation nedan för att utforska systemkartor och tekniska evolutionära milstolpar genererade via AI-arkitekturflöden.",
+        "slides_select": "Välj presentationsmaterial",
+        "deck_evolution": "🔄 Coach Engine: Projekt-evolution & Tidslinje",
+        "deck_v47": "🧠 Coach Engine: v4.7 Teknisk Arkitekturspecifikation",
         "contact_info_h": "Kontaktinformation",
         "contact_intro": "Zebricorn Consulting AB är tillgänglig för specialistuppdrag inom Finansiell IT och Dataarkitektur.",
         "contact_det": "Kontaktuppgifter",
@@ -142,13 +156,13 @@ with st.sidebar:
     st.markdown(f"### {t[lang]['nav_header']}")
     menu = st.radio(
         "Navigation Menu",
-        [t[lang]["nav_core"], t[lang]["nav_github"], t[lang]["nav_contact"]],
+        [t[lang]["nav_core"], t[lang]["nav_github"], t[lang]["nav_slides"], t[lang]["nav_contact"]],
         label_visibility="collapsed"
     )
     
     st.divider()
     st.markdown(f"**{t[lang]['status_label']}:** <span style='color: #1a7f37;'>● {t[lang]['status_text']}</span>", unsafe_allow_html=True)
-    st.caption("v2.5.0-stable // Specialist Profile")
+    st.caption("v2.6.0 // Specification Architecture")
 
 # --- 5. MAIN CONTENT ---
 
@@ -184,17 +198,19 @@ if menu == t[lang]["nav_core"]:
         st.subheader(f"🤖 {t[lang]['serv_ai_h']}")
         st.markdown(t[lang]['serv_ai_d'])
 
-# SECTION 2: GITHUB (SHOWCASING THE REPO AS IS)
+# SECTION 2: GITHUB
 elif menu == t[lang]["nav_github"]:
     st.markdown(f"<h1>{t[lang]['gh_h']}</h1>", unsafe_allow_html=True)
     st.write(t[lang]['gh_d'])
     
     st.markdown(f"### {t[lang]['repo_h']}")
-    # Representing the actual structure from your screenshot
     st.markdown("""
     <div class="file-tree">
         📁 .devcontainer/<br>
         &nbsp;&nbsp;&nbsp;&nbsp;📄 devcontainer.json<br>
+        📁 slides/<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;📄 coach_engine_deep_dive.html<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;📄 coach_engine_v4_7_architecture.html<br>
         📄 app.py<br>
         📄 requirements.txt<br>
         📄 zebricorn_logo.png<br>
@@ -205,7 +221,34 @@ elif menu == t[lang]["nav_github"]:
     st.divider()
     st.link_button(t[lang]['gh_btn'], "https://github.com/Besserschmitt/zebricorn", type="primary")
 
-# SECTION 3: CONTACT
+# SECTION 3: INTERACTIVE SLIDES DECKS (THE FRAMES)
+elif menu == t[lang]["nav_slides"]:
+    st.markdown(f"<h1>{t[lang]['slides_h']}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<p>{t[lang]['slides_d']}</p>", unsafe_allow_html=True)
+    
+    # Valbox för att byta mellan dina två olika HTML-decks
+    selected_deck = st.selectbox(
+        t[lang]["slides_select"],
+        [t[lang]["deck_evolution"], t[lang]["deck_v47"]]
+    )
+    
+    # Mappa valet till rätt lokal HTML-fil
+    if selected_deck == t[lang]["deck_evolution"]:
+        target_file = "slides/coach_engine_deep_dive.html"
+    else:
+        target_file = "slides/coach_engine_v4_7_architecture.html"
+        
+    # Säkerhetskontroll: Kolla att filen existerar innan vi försöker rita ut iFrame
+    if os.path.exists(target_file):
+        with open(target_file, "r", encoding="utf-8") as f:
+            html_content = f.read()
+            
+        # Rendera ut filen med exakt 16:9-förhållande och inbyggd skrollbar om fönstret krymper
+        components.html(html_content, height=740, scrolling=True)
+    else:
+        st.error(f"Could not locate the architectural source file at `{target_file}`. Please check directory path alignment.")
+
+# SECTION 4: CONTACT
 elif menu == t[lang]["nav_contact"]:
     st.markdown(f"<h1>{t[lang]['contact_info_h']}</h1>", unsafe_allow_html=True)
     
