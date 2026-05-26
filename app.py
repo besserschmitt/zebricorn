@@ -243,13 +243,14 @@ elif menu == t[lang]["nav_slides"]:
         with open(target_file, "r", encoding="utf-8") as f:
             html_content = f.read()
             
-        # KORREKT SYNTAX: Helt ren import av base64-biblioteket
+        # Koda strängen som en Base64 HTML-data-URI
         import base64
         b64_html = base64.b64encode(html_content.encode("utf-8")).decode("utf-8")
         data_url = f"data:text/html;base64,{b64_html}"
         
-        # MIGRATION: Ersatt st.components.v1.html med st.iframe för framtidssäkring efter 1 juni
-        st.iframe(src=data_url, height=740, scrolling=True)
+        # FIX: Plockat bort 'scrolling=True' för att åtgärda TypeError.
+        # Lagt till use_container_width för optimal responsivitet i iFramen.
+        st.iframe(src=data_url, height=740, use_container_width=True)
     else:
         st.error(f"Could not locate the architectural source file at `{target_file}`. Please check directory path alignment.")
         
