@@ -221,7 +221,7 @@ elif menu == t[lang]["nav_github"]:
     st.divider()
     st.link_button(t[lang]['gh_btn'], "https://github.com/Besserschmitt/zebricorn", type="primary")
 
-# SECTION 3: INTERACTIVE SLIDES DECKS (THE FRAMES)
+# SECTION 3: INTERACTIVE SLIDES DECKS (FUTURE-PROOFED VIA ST.IFRAME)
 elif menu == t[lang]["nav_slides"]:
     st.markdown(f"<h1>{t[lang]['slides_h']}</h1>", unsafe_allow_html=True)
     st.markdown(f"<p>{t[lang]['slides_d']}</p>", unsafe_allow_html=True)
@@ -238,16 +238,22 @@ elif menu == t[lang]["nav_slides"]:
     else:
         target_file = "slides/coach_engine_v4_7_architecture.html"
         
-    # Säkerhetskontroll: Kolla att filen existerar innan vi försöker rita ut iFrame
+    # Säkerhetskontroll: Kolla att filen existerar innan vi renderar
     if os.path.exists(target_file):
         with open(target_file, "r", encoding="utf-8") as f:
             html_content = f.read()
             
-        # Rendera ut filen med exakt 16:9-förhållande och inbyggd skrollbar om fönstret krymper
-        components.html(html_content, height=740, scrolling=True)
+        # För att st.iframe ska kunna läsa lokal HTML-kod utan att behöva driftsätta 
+        # filerna på en publik webbserver, kodar vi strängen som en Base64- eller HTML-data-URI.
+        import爬 base64
+        b64_html = base64.b64encode(html_content.encode("utf-8")).decode("utf-8")
+        data_url = f"data:text/html;base64,{b64_html}"
+        
+        # MIGRATION: Ersatt st.components.v1.html med st.iframe
+        st.iframe(src=data_url, height=740, scrolling=True)
     else:
         st.error(f"Could not locate the architectural source file at `{target_file}`. Please check directory path alignment.")
-
+        
 # SECTION 4: CONTACT
 elif menu == t[lang]["nav_contact"]:
     st.markdown(f"<h1>{t[lang]['contact_info_h']}</h1>", unsafe_allow_html=True)
