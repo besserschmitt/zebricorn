@@ -1,1 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Engine: Technical Deep Dive & Architectural Evolution</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* CORE CONFIGURATION - MANAGEMENT CONSULTING VISUAL STANDARDS */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #111111;
+            display: grid;
+            gap: 50px;
+            grid-template-columns: 1fr;
+            padding: 60px 0;
+            place-items: center;
+        }
+
+        .slide {
+            background-color: #050505;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            flex-direction: column;
+            height: 720px;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: 60px 80px;
+            position: relative;
+            width: 1280px;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        /* Subtle Action-Color Radial Gradients */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(222, 255, 154, 0.05) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            bottom: 45px;
+            left: 80px;
+            right: 80px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .slide>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* TYPOGRAPHY */
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        p,
+        li,
+        span,
+        td {
+            color: #b0b3b8;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        strong {
+            color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .slide-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .slide-title {
+            font-size: 38px;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-title span {
+            color: #deff9a;
+            /* Kinetic Lime Accent */
+        }
+
+        .slide-tracker {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-top: 15px;
+        }
+
+        .slide-footer span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CONTENT CONTAINER OBJECTS */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            width: 100%;
+            margin-top: -20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            width: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+        }
+
+        /* CARDS & TILES */
+        .card {
+            background: #111111;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .card h3 {
+            color: #deff9a;
+            font-size: 22px;
+        }
+
+        .card ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card ul li::before {
+            content: "▪";
+            color: #deff9a;
+            display: inline-block;
+            width: 15px;
+            margin-left: -5px;
+        }
+
+        .icon-box {
+            background: rgba(222, 255, 154, 0.1);
+            border-radius: 8px;
+            color: #deff9a;
+            display: inline-flex;
+            padding: 12px;
+            width: fit-content;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        /* LARGE CALLOUTS */
+        .hero-metric {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .metric-display {
+            text-align: center;
+        }
+
+        .metric-number {
+            font-size: 130px;
+            font-weight: 700;
+            color: #deff9a;
+            line-height: 1;
+        }
+
+        .metric-unit {
+            font-size: 24px;
+            color: #f5f5f5;
+            margin-top: 5px;
+        }
+
+        /* DATA TABLES */
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .custom-table th {
+            background: #111111;
+            color: #deff9a;
+            font-weight: 600;
+            padding: 14px;
+            text-align: left;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-table td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* TIMELINE TRACK */
+        .linear-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            margin: 80px 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .track-node {
+            background: #050505;
+            border: 4px solid #deff9a;
+            border-radius: 50%;
+            height: 24px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            box-shadow: 0 0 15px rgba(222, 255, 154, 0.4);
+        }
+
+        .node-desc {
+            position: absolute;
+            top: 35px;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 160px;
+        }
+
+        .node-desc h4 {
+            color: #deff9a;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .node-desc p {
+            font-size: 13px;
+        }
+
+        /* LAYOUT VARIATIONS */
+        .title-slide {
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .title-slide h1 {
+            font-size: 64px;
+            line-height: 1.1;
+        }
+
+        .title-slide h1 span {
+            color: #deff9a;
+        }
+
+        .title-slide .subtitle {
+            font-size: 26px;
+            max-width: 800px;
+            color: #b0b3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide title-slide">
+        <div class="slide-tracker">Executive Overview</div>
+        <h1>Building <span>Coach Engine</span>:<br>From Local Architecture to Cloud Automation</h1>
+        <p class="subtitle">An engineering blueprint of a parametric group fitness platform built entirely on 100%
+            open-source and zero-cost stack ecosystems.</p>
+        <div style="margin-top: 40px; border-left: 3px solid #deff9a; padding-left: 20px;">
+            <p style="font-size: 16px; color: rgba(255, 255, 255, 0.4);">AUTHOR: PRINCIPAL DATA ARCHITECT & DEVELOPER
+            </p>
+            <p style="font-size: 16px; color: rgba(255, 255, 255, 0.4);">TARGET: ELITTRUPPEN GROUP FITNESS SYSTEM</p>
+        </div>
+        <div class="slide-footer"><span>Coach Engine Project Deck</span><span>Slide 1</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">The Strategic Context</div>
+            <h2 class="slide-title">The Strategic <span>"Why"</span>: Real-World Group Constraints</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <h3>The Operational Friction</h3>
+                    <p>Traditional athletic program sheets scale poorly in volunteer community environments. Coaches
+                        face three core variables during every session:</p>
+                    <ul>
+                        <li><strong>Logistical Bottlenecks:</strong> Limited mobile fitness gear creates station
+                            congestion.</li>
+                        <li><strong>Dynamic Attendance:</strong> Roster fluctuations break fixed group pairings.</li>
+                        <li><strong>Biomechanical Stress:</strong> Diverse participant age groups require programmatic
+                            safety scalings on demand.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-bullseye"></i></div>
+                    <h3>The Core Objective</h3>
+                    <p>Design a zero-maintenance, highly reactive platform that computes optimized programming in
+                        seconds directly on an instructor's mobile device.</p>
+                    <ul>
+                        <li><strong>High Velocity:</strong> Minimize time from context inputs to visual workout map.
+                        </li>
+                        <li><strong>Extreme Resilience:</strong> Prevent crashes caused by unstable network
+                            environments.</li>
+                        <li><strong>Zero Maintenance Cost:</strong> Leverage standard open-source free tiers.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 1: Vision & Paradigm</span><span>Slide 2</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">The Development Blueprint</div>
+            <h2 class="slide-title">The Tactical <span>"How"</span>: Separation of System Tiers</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-database"></i></div>
+                    <h3>1. Immutable States</h3>
+                    <p>Decouple raw inventory, geographic constraints, and user entities from application execution
+                        layers. Rely on strict foreign key references and constraints.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-gears"></i></div>
+                    <h3>2. Context-Driven Logic</h3>
+                    <p>Isolate business rules into clean, functional code vectors. Pass weather telemetry and structural
+                        configuration levels to pure python generation loops.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                    <h3>3. Re-Render Isolation</h3>
+                    <p>Contain and shield reactive UI layers. Ensure changes to member interaction contexts (like RSVP
+                        clicks) never trigger costly full-stack re-computations.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 1: Vision & Paradigm</span><span>Slide 3</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">System Architecture</div>
+            <h2 class="slide-title">The Foundation: <span>100% Free & Open Ecosystem</span></h2>
+        </div>
+        <div class="main-content">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Layer</th>
+                        <th>Core Component</th>
+                        <th>Open Source Stack Choice</th>
+                        <th>Zero-Cost Licensing Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend & UI</strong></td>
+                        <td>Reactive Web Interface</td>
+                        <td>Streamlit Framework</td>
+                        <td>Python-native rapid UI generation, removes javascript compilation overhead. Hosted on
+                            Community Cloud.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Backend Logic</strong></td>
+                        <td>Parametric Engine Core</td>
+                        <td>Python 3.x Ecosystem</td>
+                        <td>Extensive standard library, native threading primitives, robust JSON processing, and rapid
+                            data manipulation via Pandas.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cloud Database</strong></td>
+                        <td>Relational Databank</td>
+                        <td>Supabase (PostgreSQL)</td>
+                        <td>Enterprise-tier database capabilities via the free tier. Complete support for triggers, RLS,
+                            and JSONB document blocks.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentication</strong></td>
+                        <td>Identity Management</td>
+                        <td>Supabase Auth Engine</td>
+                        <td>Secure Go-based JSON Web Token handles validation without custom cryptographic backends.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer"><span>Section 2: Component Architecture</span><span>Slide 4</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Development Roadmap</div>
+            <h2 class="slide-title">The Chronological Evolution of <span>Coach Engine</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="linear-track">
+                <div class="track-node" style="left: 0%;"></div>
+                <div class="node-desc" style="left: 0%;">
+                    <h4>v0.1: Local Genesis</h4>
+                    <p>SQLite on Mac M1. Core Tabata logic and legacy migrations.</p>
+                </div>
+
+                <div class="track-node" style="left: 25%;"></div>
+                <div class="node-desc" style="left: 25%;">
+                    <h4>v1.x: Cloud Monolith</h4>
+                    <p>Supabase and weather API integrations inside <code>app.py</code>.</p>
+                </div>
+
+                <div class="track-node" style="left: 50%;"></div>
+                <div class="node-desc" style="left: 50%;">
+                    <h4>v2.x - v3.x: Modular</h4>
+                    <p>Folder breakdown, JIT caching, i18n layer, and DB audit triggers.</p>
+                </div>
+
+                <div class="track-node" style="left: 75%;"></div>
+                <div class="node-desc" style="left: 75%;">
+                    <h4>v4.0: Parametric IQ</h4>
+                    <p>Architectural segmentation levels and location overrides.</p>
+                </div>
+
+                <div class="track-node" style="left: 100%;"></div>
+                <div class="node-desc" style="left: 100%;">
+                    <h4>v4.7: Field Mastery</h4>
+                    <p>Cherry Picker overrides and thread-safe RSVP checks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 3: Timeline & Progress</span><span>Slide 5</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 1: Local Genesis</div>
+            <h2 class="slide-title">v0.1: The 30-Hour <span>MacBook M1 Prototyping</span> Run</h2>
+        </div>
+        <div class="main-content">
+            <div class="hero-metric">
+                <div class="metric-display">
+                    <div class="metric-number">30</div>
+                    <div class="metric-unit">Hours from Zero to MVP</div>
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                    <p>Project isolated within a dedicated <code>.venv</code> on <strong>March 16 at 19:17</strong>. The
+                        goal was to write core generation algorithms directly using local assets before touching network
+                        protocols.</p>
+                    <div class="grid-2">
+                        <div class="card">
+                            <h4>Local Storage Footprint</h4>
+                            <p>Driven by SQLite initialized via <code>init_db.py</code>. Handled exercise hubs and
+                                initial user records safely offline on disk.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Data Extraction Pipeline</h4>
+                            <p>Processed and cleansed three legacy years of Excel historical data (2024–2026) within
+                                hours using custom extraction scripts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 6</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 1: Local Genesis</div>
+            <h2 class="slide-title">The Prototyping Mappsallad: <span>Lessons Learned</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Rapid Development Footprint</h3>
+                    <p>The initial local archive workspace was a collection of single-purpose logic files developed
+                        during a high-focus period:</p>
+                    <ul>
+                        <li><code>build_exercise_hub.py</code> / <code>seed_exercises.py</code>: The initial definitions
+                            for available body vectors.</li>
+                        <li><code>build_weather_logic.py</code>: Experimental rule setups mapping basic weather states.
+                        </li>
+                        <li><code>hardcore_xp_engine.py</code>: Core gamification components used to map and track
+                            member motivation metrics.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Architectural Limitations</h3>
+                    <p>While the local engine was functional, it hit scaling limits due to its unified scripting
+                        pattern:</p>
+                    <ul>
+                        <li><strong>Tight Coupling:</strong> No separation between logic blocks and file storage paths.
+                        </li>
+                        <li><strong>Concurrency Limitations:</strong> SQLite file locks blocked shared co-instructor
+                            scheduling workflows.</li>
+                        <li><strong>Field Instability:</strong> Executing scripts inside a terminal window is unusable
+                            for coaches active on field terrains.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 7</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 2: Cloud Monolith</div>
+            <h2 class="slide-title">v1.x: Moving into the Cloud Environment</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Infrastructure Jump</h3>
+                    <p>To support multiple coaches and live access, the application was decoupled from local computing
+                        hardware in mid-April 2026:</p>
+                    <ul>
+                        <li><strong>Supabase Onboarding:</strong> PostgreSQL cloud instance initialized on <strong>April
+                                7 at 14:21</strong>.</li>
+                        <li><strong>Streamlit Community Deployment:</strong> Cloud environment instantiated on
+                            <strong>April 13 at 22:33</strong>, exposing a live interface.
+                        </li>
+                        <li><strong>Live API Testing:</strong> Integration of meteorology feeds directly within the
+                            runtime environment.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>The Initial Architectural Risk</h3>
+                    <p>The system was consolidated into a single monolithic execution file (<code>app.py</code>). This
+                        caused issues during real-world field-deployment:</p>
+                    <ul>
+                        <li><strong>Network Latency:</strong> Raw database queries compiled without caching filters
+                            siphoned data on every click event.</li>
+                        <li><strong>NameError Failures:</strong> Implicit state dependencies crashed components if
+                            frames loaded out of sequence.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 8</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 2: Cloud Monolith</div>
+            <h2 class="slide-title">Field Stress Tests: Defending Against Real-World Friction</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-bolt-lightning"></i></div>
+                    <h3>Caching Architecture</h3>
+                    <p>Explicit <code>@st.cache_data(ttl=3600)</code> wrappers freeze slow, static tables like locations
+                        and exercise definitions to maximize fält performance.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-shield"></i></div>
+                    <h3>Defensive State Setup</h3>
+                    <p>Forced pre-initialization of core data structures within the app header prevents page crashes
+                        when cellular reception drops in outdoor parks.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-mobile"></i></div>
+                    <h3>Mobile UI Optimization</h3>
+                    <p>Injected custom CSS overrides directly into the rendering engine, using flex-wrapping to keep
+                        navigation tabs responsive on small smartphones.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 9</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 3: Deep Refactoring</div>
+            <h2 class="slide-title">v2.x – v3.0: Exploding the Monolith Architecture</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <p>To eliminate code redundancy and make the application enterprise-ready, the monolithic codebase
+                        was split into clean layers:</p>
+                    <div
+                        style="border-left: 2px solid #deff9a; padding-left: 15px; display: flex; flex-direction: column; gap: 8px;">
+                        <p><code>src/database.py</code>: Handles clean, Just-In-Time connection pooling.</p>
+                        <p><code>src/engine/</code>: Isolate pure algorithmic operations from interface state.</p>
+                        <p><code>views/</code>: Presentation layers focused solely on rendering logic.</p>
+                        <p><code>controllers/</code>: Validation layers filtering requests before execution.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Persistent State Hydration</h3>
+                    <p>Introduced a secure <code>CookieController()</code> framework inside the main application file.
+                        This keeps user login tokens securely cached for 30 days, avoiding repetitive logins on field
+                        equipment.</p>
+                    <p>User preferences (like localized UI language) automatically load from database user profiles
+                        directly into active state bags upon login.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 10</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 3: Deep Refactoring</div>
+            <h2 class="slide-title">v3.5: Centralized <span>Internationalization (i18n)</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Single Source of Truth</h3>
+                    <p>All user-facing UI strings were extracted out of page layouts and centralized inside
+                        <code>src/lang.py</code> within a core <code>TRANSLATIONS</code> dictionary map.
+                    </p>
+                    <p>Eliminated hardcoded strings by introducing a uniform lookup gate:
+                        <code>t("key_identity", lang)</code>.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Defensive Language Fallbacks</h3>
+                    <p>The translation lookup engine is protected against missing strings: if a specific string key is
+                        missing from the active language file (e.g., English), it safely defaults to Swedish without
+                        interrupting UI rendering pipelines.</p>
+                    <p>This decoupling makes adding new languages simple, requiring zero structural updates to view
+                        layout engines.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 11</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 3: Deep Refactoring</div>
+            <h2 class="slide-title">v3.0 Log Revolution: <span>Thread-Isolated Observability</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Non-Blocking Performance Problem</h3>
+                    <p>Writing network event entries (such as coach logins and user activity) can introduce latency and
+                        degrade the mobile experience. To solve this, logging was moved to an asynchronous architecture
+                        inside <code>logger.py</code>.</p>
+                    <p>UI interactions trigger <code>threading.Thread</code> actions instantly, offloading logging
+                        operations to background processes and keeping user interactions lag-free.</p>
+                </div>
+                <div class="card">
+                    <h3>The Multi-Thread Context Fix</h3>
+                    <p>Streamlit's context wrappers (like <code>st.context.headers</code>) lose connection parameters
+                        when shifting between threads. Coach Engine solves this by capturing client metadata before
+                        spawning a worker thread:</p>
+                    <div
+                        style="background: #000; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 14px; color: #deff9a; border: 1px solid rgba(222, 255, 154, 0.2);">
+                        # Capture metadata on the primary user thread
+                        client_ip = headers.get("X-Forwarded-For")
+                        thread = threading.Thread(target=log_event_sync, args=(..., client_ip))
+                        thread.start()
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 12</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 3: Deep Refactoring</div>
+            <h2 class="slide-title">Immutable Data Governance: <span>PostgreSQL Audit Triggers</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Decoupling Security Fields</h3>
+                    <p>Critical audit tracking was moved out of app code and placed directly onto database schemas via
+                        native triggers (<code>AFTER UPDATE ON public...</code>).</p>
+                    <p>Even if an attacker bypasses application filters or interacts with tables through external
+                        management consoles, database engines capture and preserve the modifications.</p>
+                </div>
+                <div class="card">
+                    <h3>Payload Differential Ledgers</h3>
+                    <p>Audit functions automatically compute difference snapshots using native JSONB fields, preserving
+                        records across standard update sequences:</p>
+                    <ul>
+                        <li><code>al_old_payload</code>: Tracks the historical database row values.</li>
+                        <li><code>al_new_payload</code>: Stores the updated row values.</li>
+                        <li><code>v_actor_id</code>: Tracks changes to user identities directly using PostgreSQL's
+                            <code>auth.uid()::text</code> helper.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 13</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 4: Parametric Programming</div>
+            <h2 class="slide-title">v4.0: The Brain: Trestegsraket Generation Blueprint</h2>
+        </div>
+        <div class="main-content">
+            <p style="margin-bottom: 25px;">Workout generation was rebuilt to move past random exercise pickers.
+                Sessions are built through an ordered three-stage pipeline:</p>
+            <div class="grid-3">
+                <div class="card">
+                    <h3>1. Rules Core (rules.py)</h3>
+                    <p>Validates basic limits like max equipment counts, workout durations, and environmental flags.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Select Layer (selector.py)</h3>
+                    <p>Filters available movements against real-time weather and geography limits.</p>
+                </div>
+                <div class="card">
+                    <h3>3. Architect (architect.py)</h3>
+                    <p>Builds the workout structure into final loops like Tabata, Triplets, or EMOM blocks.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 14</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 4: Parametric Programming</div>
+            <h2 class="slide-title">Strategic Programming: <span>Architectural Levels</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Level 1: Monostructural</h3>
+                    <p>Focuses on straightforward cardio and basic conditioning pathways. Simple movement profiles
+                        optimized for aerobic development.</p>
+                </div>
+                <div class="card">
+                    <h3>Level 2: Hybrid Structure</h3>
+                    <p>Introduces multi-joint compound movements and technical skill intervals, scaling density metrics
+                        automatically.</p>
+                </div>
+                <div class="card">
+                    <h3>Level 3: The Gauntlet</h3>
+                    <p>High-complexity, elite-level conditioning blocks. Uses complex grouping models with challenging
+                        exercise configurations.</p>
+                </div>
+            </div>
+            <p style="margin-top: 30px; text-align: center; color: #deff9a;">Engine parameters are dynamically
+                configured by setting <code>ses_arch_level</code> within the session data model.</p>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 15</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 4: Parametric Programming</div>
+            <h2 class="slide-title">Weather Intelligence Layer: <span>Live Meteorological Mutation</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>1. API Ingestion & JIT Backups</h3>
+                    <p>The scheduling engine fetches real-time telemetry from external weather APIs based on a
+                        location's exact GPS coordinates, retrieving temperature, wind velocity, and standard WMO
+                        weather codes.</p>
+                    <p>If an API call fails or times out while out in the park, the engine safely degrades by pulling
+                        the latest cached data profile.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Meteorological Mapping</h3>
+                    <p>The system passes active weather metrics directly into <code>rules.calculate_weather_id()</code>
+                        to translate raw WMO codes into internal, actionable environmental IDs.</p>
+                    <div
+                        style="background: #000; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 14px; color: #deff9a; border: 1px solid rgba(222, 255, 154, 0.2);">
+                        WMO_HEAVY_RAIN_CODES = [63, 65, 81, 82]
+                        EXTREME_WIND_THRESHOLD = 10.0 # m/s
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 16</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 4: Parametric Programming</div>
+            <h2 class="slide-title">Weather Intelligence Layer: <span>Biomechanical Selection Rules</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Rain Protection (wea_trigger_rain_safe)</h3>
+                    <p>When rain-safe triggers are active, filtration loops in <code>selector.py</code> automatically
+                        analyze exercise metadata profiles:</p>
+                    <ul>
+                        <li>Blocks exercises requiring users to lie down on the wet grass.</li>
+                        <li>Prioritizes standing movements or activities located under park shelters.</li>
+                    </ul>
+                </div>
+                <div class="card">extreme_wind_threshold
+                    <h3>Wind Protection ()</h3>
+                    <p>If wind speed exceeds 10 m/s, the filter loops adapt to secure field gear safety:</p>
+                    <ul>
+                        <li>Excludes loose accessories (like cones or light resistance bands) that can blow away.</li>
+                        <li>Adjusts exercise selection to leverage permanent park infrastructure via
+                            <code>ELEVATION_IDS</code> (such as concrete walls and staircases).
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 17</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 4: Parametric Programming</div>
+            <h2 class="slide-title">Managing Infrastructure & Equipment Constraints</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Geographic Optimization</h3>
+                    <p>The engine queries infrastructure flags for the current location, prioritizing natural terrain
+                        features over static movements (e.g., swapping high-knees for hill sprints when a hill is
+                        available).</p>
+                </div>
+                <div class="card">
+                    <h3>Logistical Guardrails</h3>
+                    <p>Enforces a strict gear cap: <code>MAX_EQUIPMENT_TYPES_PER_STATION = 1</code>. This prevents setup
+                        confusion and keeps equipment transitions smooth during group rotations.</p>
+                </div>
+                <div class="card">
+                    <h3>Exclusive Gear Filters</h3>
+                    <p>Scans exercise titles for keywords like <em>TRX</em>, <em>Battle Ropes</em>, or
+                        <em>Gummiband</em> to flag exclusive equipment, adjusting group pairings to keep item sharing
+                        friction-free.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 18</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Phase 5: Production Maturity</div>
+            <h2 class="slide-title">v4.7: Current Production Features</h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-arrow-pointer"></i></div>
+                    <h3>The Cherry Picker</h3>
+                    <p>Blends automated generation with instructor control. Allows coaches to lock in specific exercises
+                        while the engine handles scheduling and inventory formatting around them.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-lock"></i></div>
+                    <h3>Thread-Safe RSVP checks</h3>
+                    <p>Secures RSVP endpoints against data collision risks by processing updates through
+                        server-validated session states rather than client parameters.</p>
+                </div>
+                <div class="card">
+                    <div class="icon-box"><i class="fa-solid fa-universal-access"></i></div>
+                    <h3>Normalized Scaling</h3>
+                    <p>Enforces uniform language standards across all programming layers, mapping alternative scaling
+                        profiles cleanly to the preferred term: <strong>"förenklad övning"</strong>.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Technical Progression</span><span>Slide 19</span></div>
+    </div>
+
+    <div class="slide" style="justify-content: center; align-items: center; text-align: center;">
+        <div class="slide-tracker">Conclusion</div>
+        <h2 style="font-size: 68px; margin-bottom: 20px;">Questions?</h2>
+        <p style="font-size: 24px; max-width: 700px; color: #b0b3b8;">Coach Engine delivers smart, data-driven group
+            fitness programming built on a highly resilient, zero-cost architecture.</p>
+        <div
+            style="margin-top: 50px; color: #deff9a; font-weight: 700; font-size: 14px; letter-spacing: 3px; text-transform: uppercase;">
+            Intelligent Coaching Infrastructure • Built for the Field
+        </div>
+        <div class="slide-footer" style="position: absolute; bottom: 60px; left: 80px; right: 80px;"><span>Coach Engine
+                Project Deck</span><span>Slide 20</span></div>
+    </div>
+
+</body>
+
+</html>
