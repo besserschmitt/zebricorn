@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Engine v4.7: Deep Technical Architecture Specification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* CORE SYSTEM CONFIGURATION */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0c0e12;
+            display: grid;
+            gap: 50px;
+            grid-template-columns: 1fr;
+            padding: 60px 0;
+            place-items: center;
+        }
+
+        .slide {
+            background-color: #050608;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            display: flex;
+            flex-direction: column;
+            height: 720px;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: 60px 80px;
+            position: relative;
+            width: 1280px;
+            font-family: 'Urbanist', sans-serif;
+        }
+
+        /* Architectural Radial Ambient Accent Glow */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 50%;
+            height: 50%;
+            background: radial-gradient(circle, rgba(222, 255, 154, 0.04) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            bottom: 45px;
+            left: 80px;
+            right: 80px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            z-index: 0;
+        }
+
+        .slide>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* TYPOGRAPHY RULES */
+        h1,
+        h2,
+        h3,
+        h4 {
+            color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        p,
+        li,
+        span,
+        td,
+        pre {
+            color: #9ca3af;
+            font-size: 17px;
+            line-height: 1.5;
+        }
+
+        strong {
+            color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #deff9a;
+            background: rgba(222, 255, 154, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .slide-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .slide-title {
+            font-size: 36px;
+            letter-spacing: -0.5px;
+        }
+
+        .slide-title span {
+            color: #deff9a;
+            /* Action Color Lime */
+        }
+
+        .slide-tracker {
+            color: rgba(222, 255, 154, 0.4);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-top: 15px;
+        }
+
+        .slide-footer span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* STRUCTURE & BLOCK LAYOUTS */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            width: 100%;
+            margin-top: -10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            width: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            width: 100%;
+        }
+
+        /* INFRASTRUCTURE CARDS & SOURCE CODE CONTAINERS */
+        .card {
+            background: #0e1117;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card h3 {
+            color: #deff9a;
+            font-size: 20px;
+        }
+
+        .card ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card ul li::before {
+            content: "▪";
+            color: #deff9a;
+            display: inline-block;
+            width: 15px;
+            margin-left: -5px;
+        }
+
+        .code-snippet {
+            background: #090b0e;
+            border: 1px solid rgba(222, 255, 154, 0.1);
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            color: #e5e7eb;
+            padding: 15px;
+            overflow-x: auto;
+            line-height: 1.4;
+        }
+
+        .code-comment {
+            color: #6b7280;
+        }
+
+        .code-keyword {
+            color: #deff9a;
+        }
+
+        /* TABLES */
+        .technical-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .technical-table th {
+            background: #0e1117;
+            color: #deff9a;
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.08);
+            font-size: 15px;
+        }
+
+        .technical-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 15px;
+        }
+
+        .technical-table tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        /* LINEAR RUNTIME TIMELINE TRACK */
+        .linear-track {
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            margin: 80px 0;
+            position: relative;
+            width: 100%;
+        }
+
+        .track-node {
+            background: #050608;
+            border: 4px solid #deff9a;
+            border-radius: 50%;
+            height: 24px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            box-shadow: 0 0 15px rgba(222, 255, 154, 0.4);
+        }
+
+        .node-desc {
+            position: absolute;
+            top: 35px;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 160px;
+        }
+
+        .node-desc h4 {
+            color: #deff9a;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .node-desc p {
+            font-size: 13px;
+        }
+
+        /* LAYOUT VARIATIONS */
+        .title-slide {
+            justify-content: center;
+            align-items: flex-start;
+            gap: 25px;
+        }
+
+        .title-slide h1 {
+            font-size: 56px;
+            line-height: 1.15;
+        }
+
+        .title-slide h1 span {
+            color: #deff9a;
+        }
+
+        .title-slide .subtitle {
+            font-size: 24px;
+            max-width: 900px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide title-slide">
+        <div class="slide-tracker">System Blueprint</div>
+        <h1>Coach Engine <span>v4.7</span>:<br>Deep Technical Architecture Specification</h1>
+        <p class="subtitle">Complete technical blueprint of the production runtime ecosystem, data models, repository
+            structure, and biomechanical rule engine pipelines.</p>
+        <div style="border-left: 2px solid #deff9a; padding-left: 20px; margin-top: 20px;">
+            <p style="font-size: 15px; color: rgba(255, 255, 255, 0.3);">VERSION: PRODUCTION RE-RELEASE 4.7</p>
+            <p style="font-size: 15px; color: rgba(255, 255, 255, 0.3);">ARCHITECTURE LAYER: FULL-STACK ECOSYSTEM</p>
+        </div>
+        <div class="slide-footer"><span>Coach Engine Technical Specification</span><span>Slide 1</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Cloud Ecosystem</div>
+            <h2 class="slide-title">Cloud Infrastructure <span>Component Topology</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>1. Streamlit Cloud</h3>
+                    <p>Acts as the reactive presentation layer runtime executing the main server threads. Monitors
+                        runtime UI components and handles live state pushes via standard WebSockets.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Supabase BaaS</h3>
+                    <p>Houses the state engine running on isolated PostgreSQL. Performs high-performance relational data
+                        mapping, constraint checking, and transactional security boundaries.</p>
+                </div>
+                <div class="card">
+                    <h3>3. GitHub Repository</h3>
+                    <p>Serves as the deployment engine. Connects commits to Streamlit pipelines via webhooks, triggering
+                        zero-downtime hot-swaps of production threads.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 1: Cloud & Infrastructure</span><span>Slide 2</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Cloud Ecosystem</div>
+            <h2 class="slide-title">State Orchestration & <span>Deployment Vectors</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>GitHub-to-Streamlit Deployment</h3>
+                    <p>Every Git push triggers an automated continuous deployment cycle. Streamlit Community Cloud
+                        intercepts the GitHub release hook, executes dependencies, spins down stale execution workers,
+                        and stands up the main thread.</p>
+                </div>
+                <div class="card">
+                    <h3>Streamlit-to-Supabase Communication</h3>
+                    <p>Utilizes connection string isolation via encrypted SSL channels. Restricts raw write actions
+                        inside application layers by channeling data mutations through secure operational models.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 1: Cloud & Infrastructure</span><span>Slide 3</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Cloud Ecosystem</div>
+            <h2 class="slide-title">Network Metadata <span>Harvesting Flow</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Proxy Header Problem</h3>
+                    <p>Streamlit cloud runs behind enterprise reverse proxies (Cloudflare/Snowflake), masking direct
+                        user connection metrics. Standard calls to resolve socket data return proxy instance nodes
+                        instead of actual user tracking parameters.</p>
+                </div>
+                <div class="card">
+                    <h3>The Pipeline Solution</h3>
+                    <p>System context layers bypass proxies by checking proxy forwarding tokens. Evaluates
+                        <code>X-Forwarded-For</code> maps to locate the client origin IP before executing analytical
+                        storage logs.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 1: Cloud & Infrastructure</span><span>Slide 4</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Database Engineering</div>
+            <h2 class="slide-title">Database Blueprint: <span>Table Schema & Prefixes</span></h2>
+        </div>
+        <div class="main-content">
+            <table class="technical-table">
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Column Prefix</th>
+                        <th>Architectural Classification / Responsibility</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>users</code></td>
+                        <td><code>use_</code></td>
+                        <td>Contains identities, permission states, and active locale parameters.</td>
+                    </tr>
+                    <tr>
+                        <td><code>workout_sessions</code></td>
+                        <td><code>ses_</code></td>
+                        <td>Central operational matrix; stores configurations, scheduling, and core payload JSONs.</td>
+                    </tr>
+                    <tr>
+                        <td><code>session_participants</code></td>
+                        <td><code>sep_</code></td>
+                        <td>Relational intersection ledger handling live user RSVPs and group leadership metrics.</td>
+                    </tr>
+                    <tr>
+                        <td><code>exercises</code></td>
+                        <td><code>exe_</code></td>
+                        <td>The biomechanical motion library. Houses structural categories and alternative scalings.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>audit_log</code></td>
+                        <td><code>al_</code></td>
+                        <td>Immutable transaction log tracking old vs new data payloads.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer"><span>Section 2: Database Layer</span><span>Slide 5</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Database Engineering</div>
+            <h2 class="slide-title">Immutable Data Governance: <span>PL/pgSQL Trigger Log</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="main-content">
+                <pre class="code-snippet"
+                    style="font-size: 13px; line-height: 1.15; font-family: 'Courier New', Courier, monospace; color: #e5e7eb; background: #090b0e; border: 1px solid rgba(222, 255, 154, 0.1); padding: 12px; border-radius: 8px; white-space: pre; overflow-x: auto;"><span class="code-keyword" style="color: #deff9a;">CREATE OR REPLACE FUNCTION</span> log_adaptation_changes() <span class="code-keyword" style="color: #deff9a;">RETURNS TRIGGER AS</span> $$
+<span class="code-keyword" style="color: #deff9a;">BEGIN</span>
+    <span class="code-keyword" style="color: #deff9a;">SELECT</span> use_id <span class="code-keyword" style="color: #deff9a;">INTO</span> v_actor_id <span class="code-keyword" style="color: #deff9a;">FROM</span> public.users <span class="code-keyword" style="color: #deff9a;">WHERE</span> use_uuid = auth.uid()::text;
+    <span class="code-keyword" style="color: #deff9a;">INSERT INTO</span> public.audit_log VALUES (10, 'UPDATE', 'adaptations', OLD.ada_id::text, to_jsonb(OLD), to_jsonb(NEW), COALESCE(v_actor_id, 0));
+    <span class="code-keyword" style="color: #deff9a;">RETURN</span> NEW;
+<span class="code-keyword" style="color: #deff9a;">END</span>; $$ <span class="code-keyword" style="color: #deff9a;">LANGUAGE</span> plpgsql <span class="code-keyword" style="color: #deff9a;">SECURITY DEFINER</span>;</pre>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 2: Database Layer</span><span>Slide 6</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Database Engineering</div>
+            <h2 class="slide-title">Active Triggers <span>& Execution Boundaries</span></h2>
+        </div>
+        <div class="main-content">
+            <table class="technical-table">
+                <thead>
+                    <tr>
+                        <th>Target Table</th>
+                        <th>Trigger Identifier</th>
+                        <th>Execution Event</th>
+                        <th>Stored Procedure Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>adaptations</code></td>
+                        <td><code>trigger_audit_adaptations</code></td>
+                        <td><code>AFTER UPDATE</code></td>
+                        <td><code>log_adaptation_changes()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>exercises</code></td>
+                        <td><code>trigger_audit_exercises</code></td>
+                        <td><code>AFTER UPDATE</code></td>
+                        <td><code>log_exercise_changes()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>session_participants</code></td>
+                        <td><code>trigger_audit_session_participants</code></td>
+                        <td><code>INSERT / UPDATE</code></td>
+                        <td><code>log_participant_changes()</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>users</code></td>
+                        <td><code>trigger_audit_users</code></td>
+                        <td><code>AFTER UPDATE</code></td>
+                        <td><code>log_user_changes()</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer"><span>Section 2: Database Layer</span><span>Slide 7</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Database Engineering</div>
+            <h2 class="slide-title">Data Schema: <code>workout_sessions</code> <span>JSONB Architecture</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The <code>ses_json_blob</code> Payload</h3>
+                    <p>Instead of creating highly complex transactional rows for changing workout configurations, the
+                        core payload stores structured layouts inside a single PostgreSQL <code>JSONB</code> document
+                        wrapper.</p>
+                </div>
+                <div class="card">
+                    <h3>Schema Layout Parameters</h3>
+                    <p>The schema separates structural configuration metadata from localized view metrics:</p>
+                    <ul>
+                        <li><code>components.protocol</code>: Dictates layout types (Tabata/Triplets).</li>
+                        <li><code>components.blocks</code>: Positional array maps tracking raw station exercises.</li>
+                        <li><code>components.equipment_order</code>: Pre-computed hardware asset allocation listings.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 2: Database Layer</span><span>Slide 8</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Repository Architecture</div>
+            <h2 class="slide-title">Codebase Layout: <span>Structural Folder Blueprints</span></h2>
+        </div>
+        <div class="main-content">
+            <pre class="code-snippet"
+                style="font-size: 14px; line-height: 1.5; font-family: 'Courier New', Courier, monospace; color: #e5e7eb; background: #090b0e; border: 1px solid rgba(222, 255, 154, 0.1); padding: 20px; border-radius: 8px; white-space: pre;">
+            coachEngine/
+            ├── app.py                     <span class="code-comment" style="color: #6b7280;"># Root Orchestrator: Session Setup & Authorization Gates</span>
+            ├── src/                       <span class="code-comment" style="color: #6b7280;"># System Core Pipeline Layer</span>
+            │   ├── database.py            <span class="code-comment" style="color: #6b7280;"># Resilient JIT Connection Factory and Admin Connectors</span>
+            │   ├── lang.py                <span class="code-comment" style="color: #6b7280;"># i18n Lookup Matrix Engine</span>
+            │   ├── logger.py              <span class="code-comment" style="color: #6b7280;"># Non-blocking Thread-Isolated Event Ingestor</span>
+            │   └── engine/                <span class="code-comment" style="color: #6b7280;"># Parametric Workout Generation Core</span>
+            │       └── rules.py, selector.py, architect.py, formatter.py
+            └── views/                     <span class="code-comment" style="color: #6b7280;"># Presentation Layer Components</span>
+                └── login.py, home.py, coach.py, sessions.py, admin.py</pre>
+        </div>
+        <div class="slide-footer"><span>Section 3: Repository Design</span><span>Slide 9</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Repository Architecture</div>
+            <h2 class="slide-title"><code>app.py</code>: Token Preservation <span>& Authorization Gates</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Cookie Preservation Pipeline</h3>
+                    <p>Leverages a <code>CookieController</code> framework to check for user tokens stored in the
+                        browser. This handles authentication tracking without forcing re-logins during park usage.</p>
+                </div>
+                <div class="code-snippet">
+                    <span class="code-comment"># Auto-hydration block inside app.py header</span>
+                    saved_user_id = controller.get(<span class="code-color">'ce_user_id'</span>)
+                    <span class="code-keyword">if</span> saved_user_id <span class="code-keyword">and not</span>
+                    st.session_state.authenticated:
+                    <span class="code-comment"># Securely hydrate operational states from database row caches</span>
+                    st.session_state.user_id = int(saved_user_id)
+                    st.session_state.authenticated = <span class="code-keyword">True</span>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 3: Repository Design</span><span>Slide 10</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Repository Architecture</div>
+            <h2 class="slide-title"><code>src/database.py</code>: <span>Just-In-Time Client Factories</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Stale Sockets Vector</h3>
+                    <p>Streamlit's runtime architecture regularly drops persistent, static network attachments during
+                        idle periods, throwing connection pool timeouts in the field.</p>
+                </div>
+                <div class="card">
+                    <h3>The JIT Factory Solution</h3>
+                    <p><code>get_supabase()</code> exposes a dynamic generation interface. It checks, instantiates, and
+                        provisions fresh API connection states immediately before transaction executions, avoiding
+                        frozen web sockets.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 3: Repository Design</span><span>Slide 11</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Repository Architecture</div>
+            <h2 class="slide-title"><code>src/lang.py</code>: Defensive <span>Internationalization Framework</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="code-snippet">
+                    <span class="code-keyword">def</span> t(key: str, lang: str = <span class="code-color">"sv"</span>)
+                    -> str:
+                    <span class="code-comment">"""
+                        Performs dictionary string evaluations against global maps.
+                        Safely degrades to Swedish fallback if translation keys are missing.
+                        """</span>
+                    lang_map = TRANSLATIONS.get(lang, TRANSLATIONS[<span class="code-color">"sv"</span>])
+                    <span class="code-keyword">return</span> lang_map.get(key, key)
+                </div>
+                <div class="card">
+                    <h3>Decoupled UI Generation</h3>
+                    <p>View layers completely remove hardcoded layout labels. Templates request display names by passing
+                        a language configuration context derived directly from the logged-in user profile record.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 3: Repository Design</span><span>Slide 12</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Repository Architecture</div>
+            <h2 class="slide-title"><code>src/logger.py</code>: Non-Blocking <span>Thread Context Ingestion</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Thread Isolation Problem</h3>
+                    <p>Spawning a background thread to prevent UI lagg splits Streamlit's Thread-Local Storage wrapper
+                        context, completely cutting off access to incoming network metadata arrays.</p>
+                </div>
+                <div class="code-snippet" style="font-size: 13px;">
+                    <span class="code-keyword">def</span> log_event_async(event_type_id, user_id, details):
+                    <span class="code-comment"># Extract tracking metrics on the primary user context thread</span>
+                    headers = st.context.headers
+                    client_ip = headers.get(<span class="code-color">"X-Forwarded-For"</span>, <span
+                        class="code-color">"0.0.0.0"</span>)
+
+                    <span class="code-comment"># Spin up worker passing isolated arguments to clear state
+                        boundaries</span>
+                    t = threading.Thread(target=log_event_sync, args=(..., client_ip))
+                    t.start()
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 3: Repository Design</span><span>Slide 13</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Core Generation Engine</div>
+            <h2 class="slide-title">The Generation Pipeline: <span>The Three-Stage Architecture</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>1. Rules (rules.py)</h3>
+                    <p>Establishes the structural logic parameters. Maps weather boundaries, enforces equipment limits,
+                        and defines the structural requirements for targeted workout levels.</p>
+                </div>
+                <div class="card">
+                    <h3>2. Selector (selector.py)</h3>
+                    <p>Filters the exercise repository against real-time environment inputs, checking weather conditions
+                        and available location features.</p>
+                </div>
+                <div class="card">
+                    <h3>3. Architect (architect.py)</h3>
+                    <p>Constructs and balances station layouts, ensuring proper equipment rotation and packing the final
+                        output configuration into clean JSON formats.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Parametric Generation Engine</span><span>Slide 14</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Core Generation Engine</div>
+            <h2 class="slide-title">Type Coercion Safeguards: <span>The <code>_safe_int</code> Standard</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="code-snippet">
+                    <span class="code-keyword">def</span> _safe_int(val: Any, default: int = -1) -> int:
+                    <span class="code-comment">"""
+                        Forces mixed database types into clean integers.
+                        Protects filtering arrays from crashing on unexpected null values.
+                        """</span>
+                    <span class="code-keyword">try</span>:
+                    <span class="code-keyword">if</span> val <span class="code-keyword">is None or</span> val == <span
+                        class="code-color">""</span>: <span class="code-keyword">return</span> default
+                    <span class="code-keyword">return</span> int(float(val))
+                    <span class="code-keyword">except</span> (ValueError, TypeError): <span
+                        class="code-keyword">return</span> default
+                </div>
+                <div class="card">
+                    <h3>Shielding Filter Arrays</h3>
+                    <p>Because Supabase and Python arrays occasionally return unexpected or unaligned type mappings
+                        during dynamic JSON conversions, this coercion layer handles mismatched types gracefully,
+                        keeping generation loops crash-free.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Parametric Generation Engine</span><span>Slide 15</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Core Generation Engine</div>
+            <h2 class="slide-title">Meteorological Synchronization <span>& Weather Mapping</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Real-Time API Ingestion</h3>
+                    <p>The system polls meteorology endpoints live using the exact GPS coordinate maps of the current
+                        location, capturing three critical parameters: temperature coordinates, wind velocity trackers,
+                        and primary WMO weather codes.</p>
+                </div>
+                <div class="card">
+                    <h3>WMO Code Conversion</h3>
+                    <p>The code routes incoming meteorology metrics directly into
+                        <code>rules.calculate_weather_id()</code> to translate raw values into actionable internal
+                        layout constraints:
+                    </p>
+                    <ul>
+                        <li>Heavy Rain Array: <code>[63, 65, 81, 82]</code> triggers rain-safe parameters.</li>
+                        <li>Extreme Wind Cap: <code>&gt; 10.0 m/s</code> enforces safety overrides.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Parametric Generation Engine</span><span>Slide 16</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Core Generation Engine</div>
+            <h2 class="slide-title">Environmental Intelligence: <span>Biomechanical Selection Rules</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Rain Safety (wea_trigger_rain_safe)</h3>
+                    <p>When rain-safe triggers are active, filtration loops automatically scan exercise characteristics:
+                        blocks all activities requiring users to lie down on wet terrain, instead prioritizing standing
+                        movements or undercover locations.</p>
+                </div>
+                <div class="card">
+                    <h3>Wind Safety (extreme_wind_threshold)</h3>
+                    <p>When wind velocities exceed 10 m/s, the system updates selection rules to secure field gear
+                        safety: excludes loose, lightweight equipment that can blow away, instead prioritizing permanent
+                        park features like concrete walls and staircases.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Parametric Generation Engine</span><span>Slide 17</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Core Generation Engine</div>
+            <h2 class="slide-title">Tactical Prioritization <span>& Logistical Guardrails</span></h2>
+        </div>
+        <div class="main-content">
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Terrain Integration</h3>
+                    <p>The engine matches training requirements against local terrain features via environment
+                        overrides. If the location contains a hill, the system prioritizes dynamic hill sprints over
+                        static movements.</p>
+                </div>
+                <div class="card">
+                    <h3>Equipment Constraints</h3>
+                    <p>Enforces strict material limits: <code>MAX_EQUIPMENT_TYPES_PER_STATION = 1</code>. This prevents
+                        setup confusion and keeps transitions smooth during multi-group rotations.</p>
+                </div>
+                <div class="card">
+                    <h3>Exclusive Gear Filters</h3>
+                    <p>Scans exercise attributes for keywords like <em>TRX</em> or <em>Battle Ropes</em> to flag
+                        exclusive equipment, adjusting station setups to keep item sharing friction-free.</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide-footer"><span>Section 4: Parametric Generation Engine</span><span>Slide 18</span></div>
+    </div>
+
+    <div class="slide">
+        <div class="slide-header">
+            <div class="slide-tracker">Frontend Engineering</div>
+            <h2 class="slide-title">The v4.7 Functional <span>User Experience Layers</span></h2>
+        </div>
+        <div class="main-content">
+            <table class="technical-table">
+                <thead>
+                    <tr>
+                        <th>Interface Hub</th>
+                        <th>Functional Control Features Available</th>
+                        <th>Target UI Execution Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Member Home</strong></td>
+                        <td>Live Fragment Refreshing, Asynchronous RSVP Actions.</td>
+                        <td>Provides users with real-time roster updates and seamless scheduling changes.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coach Center</strong></td>
+                        <td>The Cherry Picker configuration, Station Layout builders, Manual override notes fields.</td>
+                        <td>Allows coaches to lock specific exercises manually while the engine builds matching station
+                            rotations around them.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Admin Portal</strong></td>
+                        <td>Access log table viewer UI, cache flushing buttons, vocabulary normalizer fields.</td>
+                        <td>Gives administrators tools to inspect audit streams, clean cache pools, and maintain
+                            training metrics.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="slide-footer"><span>Section 5: User Interface Layer</span><span>Slide 19</span></div>
+    </div>
+
+    <div class="slide" style="justify-content: center; align-items: center; text-align: center;">
+        <div class="slide-tracker">Specifications Complete</div>
+        <h2 style="font-size: 64px; margin-bottom: 25px;">End of Specification</h2>
+        <p style="font-size: 22px; max-width: 800px; color: #9ca3af;">Coach Engine v4.7 successfully delivers an
+            optimized group fitness platform, combining context-aware workout generation with resilient data management
+            on a highly stable architecture.</p>
+        <div style="margin-top: 40px; color: #deff9a; font-weight: 700; font-size: 13px; letter-spacing: 3px;">
+            PRODUCTION TECHNICAL SPECIFICATION MATRIX • DEPLOYMENT RE-RELEASE 4.7
+        </div>
+        <div class="slide-footer" style="position: absolute; bottom: 60px; left: 80px; right: 80px;"><span>Coach Engine
+                Technical Specification</span><span>Slide 20</span></div>
+    </div>
+
+</body>
+
+</html>
