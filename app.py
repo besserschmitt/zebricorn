@@ -94,10 +94,13 @@ t = {
         "serv_sol_d": "The link between business and IT. Experience in modernizing legacy landscapes and establishing stable data flows in Azure DevOps.",
         "serv_ai_h": "AI-Integrated Dev",
         "serv_ai_d": "Utilizes GitHub Copilot and advanced prompting to accelerate documentation, code quality, and traceability.",
-        "gh_h": "Open Source & Repository",
-        "gh_d": "The Zebricorn repository is designed for cloud-native deployment and containerized development. Here is the current architecture of the main project:",
-        "repo_h": "Repository Structure (zebricorn / main)",
-        "gh_btn": "View on GitHub",
+        "gh_h": "Open Source & Repository Hub",
+        "gh_d": "Explore the official version-controlled repositories below, ranging from production blueprint architectures to the local core framework layouts.",
+        "showcase_h": "Production Core Showcase (coach-engine-showcase / main)",
+        "showcase_d": "This repository serves as a completely production-cleaned, Ruff-validated technical blueprint. It isolates the functional parametric execution engine layers, dynamic biomechanical meteorological filtration, and custom multi-threaded logging utilities.",
+        "showcase_btn": "Explore Showcase Repo",
+        "repo_h": "Infrastructure Structure (zebricorn / main)",
+        "gh_btn": "View Infrastructure Repo",
         "slides_h": "Interactive Architecture Specifications",
         "slides_d": "Select an architectural deck below to explore enterprise system maps and evolution metrics generated via tokenized prompt flows.",
         "slides_select": "Choose Presentation Deck",
@@ -129,10 +132,13 @@ t = {
         "serv_sol_d": "Länken mellan verksamhet och IT. Erfarenhet av att modernisera legacy-landskap och etablera stabila dataflöden i Azure DevOps.",
         "serv_ai_h": "AI-Integrerad Utveckling",
         "serv_ai_d": "Använder GitHub Copilot och avancerad prompting för att accelerera dokumentation, kodkvalitet och spårbarhet.",
-        "gh_h": "Open Source & Repository",
-        "gh_d": "Zebricorn-repositoryt är byggt för cloud-native driftsättning och containeriserad utveckling. Här är den nuvarande arkitekturen för huvudprojektet:",
-        "repo_h": "Repository-struktur (zebricorn / main)",
-        "gh_btn": "Se på GitHub",
+        "gh_h": "Open Source & Repository Hub",
+        "gh_d": "Utforska de officiella versionshanterade källkodshubbar nedan, spännande från produktionsredo arkitekturritningar till det lokala kärnramverkets struktur.",
+        "showcase_h": "Production Core Showcase (coach-engine-showcase / main)",
+        "showcase_d": "Detta repository fungerar som en helt produktionsren, Ruff-validerad teknisk ritning. Den isolerar de funktionella parametriska exekveringsskikten, dynamisk biomekanisk väderfiltrering samt anpassade flertrådade loggningsfunktioner.",
+        "showcase_btn": "Utforska Showcase Repo",
+        "repo_h": "Infrastrukturstruktur (zebricorn / main)",
+        "gh_btn": "Se Infrastruktur-Repo",
         "slides_h": "Interaktiva Arkitekturspecifikationer",
         "slides_d": "Välj en presentation nedan för att utforska systemkartor och tekniska evolutionära milstolpar genererade via AI-arkitekturflöden.",
         "slides_select": "Välj presentationsmaterial",
@@ -198,12 +204,20 @@ if menu == t[lang]["nav_core"]:
         st.subheader(f"🤖 {t[lang]['serv_ai_h']}")
         st.markdown(t[lang]['serv_ai_d'])
 
-# SECTION 2: GITHUB
+# SECTION 2: GITHUB (SHOWCASING MULTIPLE REPOSITORIES)
 elif menu == t[lang]["nav_github"]:
     st.markdown(f"<h1>{t[lang]['gh_h']}</h1>", unsafe_allow_html=True)
     st.write(t[lang]['gh_d'])
     
-    st.markdown(f"### {t[lang]['repo_h']}")
+    # 1. PRIMARY REPOSITORY: THE BRAND NEW SHOWCASE
+    st.markdown(f"## {t[lang]['showcase_h']}")
+    st.markdown(f"<p>{t[lang]['showcase_d']}</p>", unsafe_allow_html=True)
+    st.link_button(t[lang]['showcase_btn'], "https://github.com/Besserschmitt/coach-engine-showcase", type="primary")
+    
+    st.divider()
+    
+    # 2. SECONDARY REPOSITORY: THE INFRASRUCTURE LAYOUT
+    st.markdown(f"## {t[lang]['repo_h']}")
     st.markdown("""
     <div class="file-tree">
         📁 .devcontainer/<br>
@@ -218,8 +232,8 @@ elif menu == t[lang]["nav_github"]:
     </div>
     """, unsafe_allow_html=True)
     
-    st.divider()
-    st.link_button(t[lang]['gh_btn'], "https://github.com/Besserschmitt/zebricorn", type="primary")
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.link_button(t[lang]['gh_btn'], "https://github.com/Besserschmitt/zebricorn")
 
 # SECTION 3: INTERACTIVE SLIDES DECKS (FUTURE-PROOFED VIA ST.IFRAME)
 elif menu == t[lang]["nav_slides"]:
@@ -248,8 +262,7 @@ elif menu == t[lang]["nav_slides"]:
         b64_html = base64.b64encode(html_content.encode("utf-8")).decode("utf-8")
         data_url = f"data:text/html;base64,{b64_html}"
         
-        # SLUTGILTIG FIX: Plockat bort use_container_width för att eliminera TypeError.
-        # st.iframe expanderar automatiskt horisontellt i moderna Streamlit-versioner.
+        # MIGRATION COMPLETED: st.iframe expanderar automatiskt horisontellt i moderna Streamlit-versioner.
         st.iframe(src=data_url, height=740)
     else:
         st.error(f"Could not locate the architectural source file at `{target_file}`. Please check directory path alignment.")
