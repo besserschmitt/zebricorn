@@ -248,9 +248,9 @@ elif menu == t[lang]["nav_slides"]:
         b64_html = base64.b64encode(html_content.encode("utf-8")).decode("utf-8")
         data_url = f"data:text/html;base64,{b64_html}"
         
-        # FIX: Plockat bort 'scrolling=True' för att åtgärda TypeError.
-        # Lagt till use_container_width för optimal responsivitet i iFramen.
-        st.iframe(src=data_url, height=740, use_container_width=True)
+        # SLUTGILTIG FIX: Plockat bort use_container_width för att eliminera TypeError.
+        # st.iframe expanderar automatiskt horisontellt i moderna Streamlit-versioner.
+        st.iframe(src=data_url, height=740)
     else:
         st.error(f"Could not locate the architectural source file at `{target_file}`. Please check directory path alignment.")
         
