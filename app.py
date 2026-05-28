@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import os
 
 # --- 1. CONFIGURATION ---
@@ -285,13 +284,13 @@ elif menu == t[lang]["nav_contact"]:
 - **Location:** {t[lang]['loc']}""")
     
     st.markdown(f"### {t[lang]['biz_info']}")
-    st.markdown(f"""
+    st.markdown("""
 - **Company:** Zebricorn Consulting AB
 - **Org.nr:** 559553-6060""")
 
 # --- 6. FOOTER ---
 st.divider()
-st.markdown(f"""
+st.markdown("""
 <div style='display: flex; justify-content: space-between; align-items: center; opacity: 0.6; font-size: 12px;'>
     <div>© 2026 Zebricorn Consulting AB | Org.nr: 559553-6060</div>
     <div>Built with Python & Streamlit // Cloud-Native Architecture</div>
